@@ -2,7 +2,7 @@
 A simple makefile generator for C/C++/Assembly Projects of all shapes and sizes
 
 #How does it work
-Simply download the genmake.py script and execute it with python:
+Simply download the genmake.py script, put it on your project root folder, and execute it with python:
 
 ```
 python genmake.py
