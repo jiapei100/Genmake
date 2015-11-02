@@ -27,7 +27,7 @@ For example, imagine you want to compile foo.c differently from all other files.
 
 What's more, you can also inject dependencies, as such:
 ```javascript
-// $DEPS(bar, baz) Where 'bar' and 'baz' are object files which will be recursively scanned through the build path  
+// $DEPS(bar, baz) Where 'bar' and 'baz' are object files which exist/will exist on the build path  
 ```
 
 Finally, it is also possible to inject misc configurations, for whatever reason:

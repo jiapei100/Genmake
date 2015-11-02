@@ -36,15 +36,22 @@ def parse_sourcefile(source_content):
 	inj_misc = ""
 
 	# Search for flag injection:
-	match_flags = re.search(r'\$FLAGS\(((?:.|\n)+?)\)', source_content, re.M)
+	match_flags = re.search(r'\$FLAGS\(((?:\w|\n)+?)\)', source_content, re.M)
 	if match_flags:
 		inj_flags = match_flags.group(1)
-	match_deps = re.search(r'\$DEPS\(((?:.|\n)+?)\)', source_content, re.M)
+
+	# Dependency injection:
+	match_deps = re.search(r'\$DEPS\(((?:\w|\n|,)+?)\)', source_content, re.M)
 	if match_deps:
-		inj_deps = match_deps.group(1)
-	match_misc = re.search(r'\$INJ\(((?:.|\n)+?)\)', source_content, re.M)
+		deps = match_deps.group(1).split(',')
+		for dep in deps:
+			inj_deps += build_path + "\\" + dep + ".o "
+
+	# Whatever injection:
+	match_misc = re.search(r'\$INJ\(((?:\w|\n)+?)\)', source_content, re.M)
 	if match_misc:
 		inj_misc = match_misc.group(1)
+
 	return [inj_flags, inj_deps, inj_misc] # Injection of: flags, dependencies (objects) and misc (respectively)
 
 # Scans the top_path for files with formats that belong to 'formats' list
@@ -118,7 +125,7 @@ def gen_make(tree):
 				flags_to_use = 'NASFLAGS'
 				is_asm = ""
 
-			subdirmk.write('\n$(BOUT)\\'+files[i]+'.o: '+ffile+'\n\
+			subdirmk.write('\n$(BOUT)\\'+files[i]+'.o: '+ffile+' ' + deps + '\n\
 	@echo \'>> Building file: $<\'\n\
 	@echo \'>> Invoking ' + toolname + '\'\n\
 	$(' + compiler_to_use  + ') $(' + flags_to_use + ') ' + customflags + ' -o $@ '+is_asm+' $< '+ deps + ' '+ injection +'\n\
@@ -163,7 +170,7 @@ clean:\n\
 
 print "**** Generating Makefile project. ****\n"
 execname = raw_input("Please, enter the output executable filename (with extension): ")
-undefault_paths = raw_input("\nDo you wish to set special paths for the source code/build/executable files ? (N/y): ")
+undefault_paths = raw_input("\nDo you wish to set special paths for the source code/build/executable files?\n(N/y): ")
 if(undefault_paths == "Y" or undefault_paths == "y"):
 	top_path = raw_input("Enter the (relative) folder where your source code is: ")
 	main_make_path = top_path
@@ -171,4 +178,4 @@ if(undefault_paths == "Y" or undefault_paths == "y"):
 	runnable_path = raw_input("Enter the (relative) folder where your executable will be: ")
 
 gen_make(scan_tree())
-print "**** Makefile project generation completed. ****\n\nWrite: 'make -f makefile.mak all' to start compilation"
+print "**** Makefile project generation completed. ****\n\nType 'make -f makefile.mak all' to start compilation"
